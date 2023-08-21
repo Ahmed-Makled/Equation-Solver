@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/fav.png">
+    <title>Equation Solver</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font: inherit;
+            background: #f5f5f5;
+        }
+        .page {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            width: 50%;
+            margin: auto;
+        }
+        @media(max-width:769px) {
+            .card {
+                width: 100%;
+            }
+        }
+        .card h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #db3f59;
+            margin-bottom: 20px;
+        }
+        .card__body .calculator .inputs_data,
+        .card__body .calculator .inputs_data div {
+            display: flex;
+            align-items: center;
+        }
+        @media(max-width:769px) {
+            .card__body .calculator .inputs_data,
+            .card__body .calculator .inputs_data div {
+                flex-direction: column;
+                align-items: unset
+            }
+        }
+        .card__body .calculator .inputs_data div {
+            flex: 1 1 45%;
+            margin-inline-end: 16px;
+        }
+        @media(max-width:769px) {
+            .card__body .calculator .inputs_data div {
+                flex: 1 1 100%;
+            }
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            text-align: left;
+            color: #db3f59;
+            font-weight: 600;
+            margin-inline-end: 4px;
+        }
+        input {
+            display: block;
+            border-radius: 3px;
+            border: 1px solid #cecece;
+            font-size: 13px;
+            width: 100%;
+            font-weight: 400;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: 2.31;
+            letter-spacing: normal;
+            color: #001a36;
+            text-decoration: none;
+            text-indent: 5px;
+            margin: 5px 0 20px;
+            flex: 1 1 0;
+        }
+        input::placeholder {
+            color: #535353;
+        }
+        input:focus {
+            outline: none;
+            border-color: #db3f59;
+        }
+        button {
+            background-color: #db3f59;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        #clear {
+            background-color: #535353;
+        }
+        button:hover {
+            background-color: #c0354e;
+        }
+        hr {
+            margin-top: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #dadada
+        }
+        #result {
+            font-size: 18px;
+            color: #4f4f4f;
+            text-align: start;
+        }
+        @media(max-width:769px) {
+            #result {
+                text-align: center;
+            }
+        }
+        #result h6 {
+            color: #db3f59;
+        }
+        #result div {
+            display: inline-flex;
+            align-items: center;
+            margin-inline-end: 80px;
+        }
+        #result p {
+            font-weight: 700;
+            color: #001a36;
+            font-size: 14pt;
+        }
+        #result p.error {
+            color: #db3f59;
+            transition: all 1s ease-in-out;
+            text-align: center;
+        }
+        #result div p {
+            margin-inline-end: 8px;
+        }
+        #result span {
+            color: #001a36;
+            font-size: 12pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="card">
+            <div class="card__header">
+                <h1>Equation Solver</h1>
+            </div>
+            <div class="card__body">
+                <div class="calculator">
+                    <div class="inputs_data">
+                        <div class="equation-input">
+                            <label for="equation1">Equation 1:</label>
+                            <input type="text" id="equation1" placeholder="e.g., x + y = 10">
+                        </div>
+                        <div class="equation-input">
+                            <label for="equation2">Equation 2:</label>
+                            <input type="text" id="equation2" placeholder="e.g., 2x + y = 15">
+                        </div>
+                    </div>
+                    <button id="calculate">Compute</button>
+                    <button id="clear">Clear</button> <!-- New Clear button -->
+                    <div id="result" class="result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        class EquationSolver {
+            constructor() {
+                this.initialize();
+            }
+            initialize() {
+                const calculateButton = document.getElementById('calculate');
+                const clearButton = document.getElementById('clear');
+                calculateButton.addEventListener('click', () => {
+                    this.calculateEquations();
+                });
+                clearButton.addEventListener('click', () => {
+                    this.clearInputFields();
+                    this.clearResult();
+                });
+            }
+            calculateEquations() {
+                const equation1 = document.getElementById('equation1').value;
+                const equation2 = document.getElementById('equation2').value;
+                if (equation1.trim() === '' || equation2.trim() === '') {
+                    this.displayResult(`<p class='error'> Please enter both equations.</p>`);
+                    return;
+                }
+                const eq1Coefficients = this.getCoefficients(equation1);
+                const eq2Coefficients = this.getCoefficients(equation2);
+                if (!this.isValidCoefficients(eq1Coefficients) || !this.isValidCoefficients(eq2Coefficients)) {
+                    this.displayResult(`<p class='error'> Please enter valid coefficients.</p>`);
+                    return;
+                }
+                const [a1, b1, c1] = eq1Coefficients;
+                const [a2, b2, c2] = eq2Coefficients;
+                const denominator = a1 * b2 - a2 * b1;
+                if (denominator === 0) {
+                    this.displayResult(`<p class='error'><The system of equations has no unique solution./p>`);
+                    return;
+                }
+                const x = (c1 * b2 - c2 * b1) / denominator;
+                const y = (a1 * c2 - a2 * c1) / denominator;
+                this.displayResult(`
+                    <hr>
+                    <p>Result:</p>
+                    <div>
+                        <p>X:</p>
+                        <span>${x.toFixed(2)}</span>
+                    </div>
+                    <div>
+                        <p>Y:</p>
+                        <span>${y.toFixed(2)}</span>
+                    </div>
+                `);
+            }
+            getCoefficients(equation) {
+                // Extract coefficients using regular expression
+                const coefficients = equation.match(/[+-]?\s*\d+(\.\d*)?|[+-]/g) || [];
+                // Convert coefficients to numbers
+                return coefficients.map(coeff => parseFloat(coeff.replace(/\s+/g, '')));
+            }
+            isValidCoefficients(coefficients) {
+                // Check if all coefficients are valid numbers  
+                return coefficients.every(coeff => !isNaN(coeff));
+            }
+            clearInputFields() {
+                document.getElementById('equation1').value = '';
+                document.getElementById('equation2').value = '';
+            }
+            clearResult() {
+                document.getElementById('result').innerHTML = '';
+            }
+            displayResult(content) {
+                const resultElement = document.getElementById('result');
+                resultElement.innerHTML = content;
+            }
+        }
+        // Initialize the EquationSolver class
+        const equationSolver = new EquationSolver();
+    </script>
+</body>
+</html>
+
+
