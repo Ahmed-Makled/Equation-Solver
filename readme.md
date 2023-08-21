@@ -1,5 +1,3 @@
-Sure, here's a sample README file for the Equation Solver web application:
-
 # Equation Solver
 
 Equation Solver is a simple web application that allows users to solve systems of linear equations using the method of substitution. The application takes two equations as input, each in the form of "ax + by = c", and calculates the values of variables 'x' and 'y' that satisfy both equations.
